@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Empyreal Seeker Assessment</title>
+<style>
+  /* ══════════════════════════════════════════════════════════
+     EMPYREAL SEEKER ASSESSMENT — FAITHFUL PDF REBUILD
+     Designed for Google Apps Script HtmlService deployment.
+     All assets self-contained. No external dependencies.
+     ══════════════════════════════════════════════════════════ */
+
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html, body {
+    width: 100%;
+    min-height: 100vh;
+    background: #f5f3ef;
+  }
+
+  body {
+    font-family: 'Times New Roman', 'Georgia', 'Garamond', serif;
+    color: #1a1a1a;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Page Container (mimics printed document) ── */
+  .page {
+    position: relative;
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 52px 64px 60px;
+    background: #ffffff;
+    min-height: 100vh;
+    overflow: hidden;
+    /* subtle paper shadow for depth */
+    box-shadow: 0 0 40px rgba(0,0,0,0.08);
+  }
+
+  @media (max-width: 820px) {
+    .page {
+      padding: 36px 28px 48px;
+      box-shadow: none;
+    }
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     PHOENIX WATERMARK — Custom SVG Background
+     Centered behind form content at low opacity.
+     Intricate spread-wing phoenix with feather detail.
+     ══════════════════════════════════════════════════════════ */
+  .phoenix-watermark-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -48%);
+    width: 750px;
+    height: 900px;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.10;
+  }
+
+  @media (max-width: 820px) {
+    .phoenix-watermark-container {
+      width: 95vw;
+      height: 115vw;
+    }
+  }
+
+  /* ── Form content layer above watermark ── */
+  .content {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     TITLE BLOCK — Matches PDF header precisely
+     ══════════════════════════════════════════════════════════ */
+  .title-block {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+
+  .title-block h1 {
+    font-family: 'Times New Roman', 'Georgia', serif;
+    font-size: 28px;
+    font-weight: 400;
+    color: #1a1a1a;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    letter-spacing: 0.02em;
+    margin-bottom: 0;
+  }
+
+  /* ── Description paragraph ── */
+  .intro-text {
+    font-size: 14.5px;
+    color: #222;
+    line-height: 1.6;
+    margin-top: 22px;
+    margin-bottom: 14px;
+  }
+
+  .footnote {
+    font-size: 13.5px;
+    color: #333;
+    margin-bottom: 30px;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     SECTION HEADERS — Underlined, bold, left-aligned
+     ══════════════════════════════════════════════════════════ */
+  .section-heading {
+    font-family: 'Times New Roman', 'Georgia', serif;
+    font-size: 17px;
+    font-weight: 400;
+    color: #1a1a1a;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    margin-top: 28px;
+    margin-bottom: 4px;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     FORM FIELDS — Simple line-based inputs matching PDF
+     ══════════════════════════════════════════════════════════ */
+  .field-block {
+    margin-bottom: 18px;
+  }
+
+  .field-block label,
+  .field-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 4px;
+    line-height: 1.4;
+  }
+
+  .field-hint {
+    display: block;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 4px;
+    line-height: 1.4;
+  }
+
+  /* Single-line text input styled as a simple underline */
+  .line-input {
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid #333;
+    background: transparent;
+    font-family: 'Times New Roman', 'Georgia', serif;
+    font-size: 14px;
+    color: #1a1a1a;
+    padding: 6px 2px 4px;
+    outline: none;
+    border-radius: 0;
+    -webkit-appearance: none;
+  }
+
+  .line-input:focus {
+    border-bottom-color: #000;
+    border-bottom-width: 1.5px;
+  }
+
+  .line-input::placeholder {
+    color: #bbb;
+    font-style: italic;
+    font-size: 12px;
+  }
+
+  /* Multi-line textarea styled as ruled lines */
+  .lined-textarea {
+    width: 100%;
+    border: none;
+    background: transparent;
+    font-family: 'Times New Roman', 'Georgia', serif;
+    font-size: 14px;
+    color: #1a1a1a;
+    padding: 4px 2px;
+    outline: none;
+    resize: none;
+    border-radius: 0;
+    -webkit-appearance: none;
+    /* Ruled-line effect via repeating gradient */
+    line-height: 28px;
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 27px,
+      #333 27px,
+      #333 28px
+    );
+    background-attachment: local;
+  }
+
+  .lined-textarea:focus {
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 27px,
+      #111 27px,
+      #111 28px
+    );
+  }
+
+  .lined-textarea::placeholder {
+    color: #bbb;
+    font-style: italic;
+    font-size: 12px;
+  }
+
+  /* Specific row heights matching PDF proportions */
+  .rows-3 { height: 84px; }   /* 3 ruled lines */
+  .rows-4 { height: 112px; }  /* 4 ruled lines */
+  .rows-7 { height: 196px; }  /* 7 ruled lines */
+
+  /* ══════════════════════════════════════════════════════════
+     SUBMIT SECTION — Clean, unobtrusive
+     ══════════════════════════════════════════════════════════ */
+  .submit-section {
+    text-align: center;
+    margin-top: 36px;
+    padding-top: 24px;
+  }
+
+  .submit-btn {
+    font-family: 'Times New Roman', 'Georgia', serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #fff;
+    background: #333;
+    border: 1px solid #222;
+    padding: 10px 40px;
+    cursor: pointer;
+    transition: background 0.25s ease, transform 0.15s ease;
+  }
+
+  .submit-btn:hover {
+    background: #111;
+    transform: translateY(-1px);
+  }
+
+  .submit-btn:active {
+    transform: translateY(0);
+  }
+
+  .submit-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .submit-note {
+    font-size: 12px;
+    color: #888;
+    margin-top: 10px;
+    font-style: italic;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     SUCCESS OVERLAY
+     ══════════════════════════════════════════════════════════ */
+  .success-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(255,255,255,0.96);
+    z-index: 100;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
+
+  .success-overlay.visible {
+    display: flex;
+  }
+
+  .success-overlay h2 {
+    font-family: 'Times New Roman', 'Georgia', serif;
+    font-size: 24px;
+    font-weight: 400;
+    color: #1a1a1a;
+    margin-bottom: 8px;
+  }
+
+  .success-overlay p {
+    font-size: 15px;
+    color: #555;
+    font-style: italic;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     ERROR TOAST
+     ══════════════════════════════════════════════════════════ */
+  .error-toast {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #8a2a2a;
+    color: #fff;
+    padding: 10px 22px;
+    font-family: 'Times New Roman', serif;
+    font-size: 13px;
+    z-index: 200;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    transition: opacity 0.3s;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     RESPONSIVE — iOS zoom prevention
+     ══════════════════════════════════════════════════════════ */
+  @media (max-width: 600px) {
+    .line-input, .lined-textarea { font-size: 16px; }
+    .title-block h1 { font-size: 22px; }
+    .page { padding: 24px 18px 40px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- ══════════════════════════════════════════════════════════
+       PHOENIX WATERMARK — Heraldic Style
+       Upward V-wings, sunburst halo, scaled chest,
+       talons, flowing tail. Matches client reference art.
+       ══════════════════════════════════════════════════════════ -->
+  <div class="phoenix-watermark-container">
+    <svg viewBox="0 0 800 960" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+      <g fill="none" stroke="#777" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+
+        <!-- ═══ SUNBURST HALO ═══ -->
+        <!-- Radiating lines around the head -->
+        <line x1="400" y1="128" x2="400" y2="86" stroke-width="1.0"/>
+        <line x1="408" y1="130" x2="416" y2="90" stroke-width="1.0"/>
+        <line x1="416" y1="134" x2="432" y2="96" stroke-width="1.0"/>
+        <line x1="422" y1="140" x2="446" y2="106" stroke-width="1.0"/>
+        <line x1="428" y1="148" x2="456" y2="118" stroke-width="1.0"/>
+        <line x1="432" y1="156" x2="464" y2="132" stroke-width="1.0"/>
+        <line x1="434" y1="164" x2="468" y2="148" stroke-width="1.0"/>
+        <line x1="392" y1="130" x2="384" y2="90" stroke-width="1.0"/>
+        <line x1="384" y1="134" x2="368" y2="96" stroke-width="1.0"/>
+        <line x1="378" y1="140" x2="354" y2="106" stroke-width="1.0"/>
+        <line x1="372" y1="148" x2="344" y2="118" stroke-width="1.0"/>
+        <line x1="368" y1="156" x2="336" y2="132" stroke-width="1.0"/>
+        <line x1="366" y1="164" x2="332" y2="148" stroke-width="1.0"/>
+        <!-- Extra fine rays -->
+        <line x1="404" y1="128" x2="408" y2="88" stroke-width="0.7"/>
+        <line x1="396" y1="128" x2="392" y2="88" stroke-width="0.7"/>
+        <line x1="420" y1="136" x2="440" y2="98" stroke-width="0.7"/>
+        <line x1="380" y1="136" x2="360" y2="98" stroke-width="0.7"/>
+        <line x1="426" y1="144" x2="452" y2="112" stroke-width="0.7"/>
+        <line x1="374" y1="144" x2="348" y2="112" stroke-width="0.7"/>
+
+        <!-- ═══ HEAD ═══ -->
+        <!-- Skull outline - facing slightly left -->
+        <path d="M400 168 C412 166 424 160 430 150 C434 142 432 134 426 128 C420 122 412 120 404 120 C396 120 388 124 382 130 C376 136 374 144 378 152 C382 160 390 166 400 168Z" stroke-width="2.0"/>
+        <!-- Eye -->
+        <ellipse cx="406" cy="142" rx="4" ry="3.5" stroke-width="1.5"/>
+        <circle cx="407" cy="142" r="1.8" fill="#777" stroke="none"/>
+        <!-- Beak - sharp, curved, pointing left-downward -->
+        <path d="M382 148 C376 152 366 158 360 162 C356 164 354 162 356 158 C358 154 366 148 374 144" stroke-width="2.0"/>
+        <path d="M374 144 C370 148 364 154 360 158" stroke-width="1.2"/>
+
+        <!-- ═══ NECK ═══ -->
+        <path d="M394 168 C388 178 384 190 382 200 C380 210 380 218 382 226" stroke-width="1.6"/>
+        <path d="M406 168 C412 178 416 190 418 200 C420 210 420 218 418 226" stroke-width="1.6"/>
+        <!-- Neck feather detail -->
+        <path d="M390 180 C394 184 398 188 400 192" stroke-width="0.8"/>
+        <path d="M410 180 C406 184 402 188 400 192" stroke-width="0.8"/>
+        <path d="M388 196 C392 200 396 206 400 210" stroke-width="0.8"/>
+        <path d="M412 196 C408 200 404 206 400 210" stroke-width="0.8"/>
+
+        <!-- ═══ BODY — Scaled/Overlapping Chest Feathers ═══ -->
+        <!-- Body outline -->
+        <path d="M382 226 C372 236 362 254 358 275 C354 296 356 318 362 340 C368 362 378 382 392 400 C398 408 400 410 400 410 C400 410 402 408 408 400 C422 382 432 362 438 340 C444 318 446 296 442 275 C438 254 428 236 418 226" stroke-width="2.0"/>
+
+        <!-- Row 1 scales -->
+        <path d="M388 232 C392 238 396 244 400 248 C404 244 408 238 412 232" stroke-width="1.2"/>
+        <!-- Row 2 -->
+        <path d="M382 248 C386 254 392 260 396 264" stroke-width="1.0"/>
+        <path d="M400 250 C400 256 400 262 400 268" stroke-width="1.0"/>
+        <path d="M418 248 C414 254 408 260 404 264" stroke-width="1.0"/>
+        <!-- Row 3 -->
+        <path d="M378 264 C382 270 388 278 394 284" stroke-width="1.0"/>
+        <path d="M400 266 C400 274 400 280 400 288" stroke-width="1.0"/>
+        <path d="M422 264 C418 270 412 278 406 284" stroke-width="1.0"/>
+        <!-- Row 4 -->
+        <path d="M374 284 C378 290 386 298 394 306" stroke-width="1.0"/>
+        <path d="M400 286 C400 294 400 302 400 310" stroke-width="1.0"/>
+        <path d="M426 284 C422 290 414 298 406 306" stroke-width="1.0"/>
+        <!-- Row 5 -->
+        <path d="M372 304 C376 310 384 320 394 328" stroke-width="1.0"/>
+        <path d="M400 306 C400 316 400 324 400 332" stroke-width="1.0"/>
+        <path d="M428 304 C424 310 416 320 406 328" stroke-width="1.0"/>
+        <!-- Row 6 -->
+        <path d="M370 326 C376 334 384 342 394 350" stroke-width="1.0"/>
+        <path d="M400 328 C400 338 400 346 400 354" stroke-width="1.0"/>
+        <path d="M430 326 C424 334 416 342 406 350" stroke-width="1.0"/>
+        <!-- Row 7 -->
+        <path d="M372 348 C378 356 386 364 396 374" stroke-width="1.0"/>
+        <path d="M400 350 C400 360 400 368 400 378" stroke-width="1.0"/>
+        <path d="M428 348 C422 356 414 364 404 374" stroke-width="1.0"/>
+        <!-- Scale cross-lines -->
+        <path d="M384 245 C390 250 398 254 400 254 C402 254 410 250 416 245" stroke-width="0.8"/>
+        <path d="M380 262 C388 268 396 272 400 272 C404 272 412 268 420 262" stroke-width="0.8"/>
+        <path d="M376 280 C384 288 394 292 400 292 C406 292 416 288 424 280" stroke-width="0.8"/>
+        <path d="M374 300 C382 308 394 314 400 314 C406 314 418 308 426 300" stroke-width="0.8"/>
+        <path d="M372 320 C380 328 394 334 400 334 C406 334 420 328 428 320" stroke-width="0.8"/>
+        <path d="M372 342 C380 350 394 356 400 356 C406 356 420 350 428 342" stroke-width="0.8"/>
+        <path d="M374 362 C382 370 394 376 400 376 C406 376 418 370 426 362" stroke-width="0.8"/>
+        <path d="M378 380 C386 388 396 394 400 394 C404 394 414 388 422 380" stroke-width="0.8"/>
+
+        <!-- ═══ LEFT WING — Sweeping Upward ═══ -->
+        <!-- Wing outline (upper edge) -->
+        <path d="M382 226 C368 210 340 185 310 160 C280 136 245 112 210 95 C175 78 140 68 108 64 C82 62 60 66 48 76" stroke-width="2.2"/>
+        <!-- Wing outline (lower edge / underwing) -->
+        <path d="M362 290 C348 275 320 255 290 238 C260 222 228 210 198 204 C170 198 148 200 132 208 C118 216 112 228 114 240" stroke-width="2.0"/>
+
+        <!-- Covert feathers (small, near body) -->
+        <path d="M374 248 C362 236 344 222 324 210" stroke-width="1.2"/>
+        <path d="M370 260 C356 248 336 234 314 222" stroke-width="1.2"/>
+        <path d="M366 274 C350 260 328 246 306 236" stroke-width="1.2"/>
+
+        <!-- Secondary feathers (medium, mid-wing) -->
+        <path d="M324 210 C304 196 278 182 252 172 C238 168 224 168 214 174" stroke-width="1.4"/>
+        <path d="M314 222 C292 208 264 194 238 186 C222 182 208 184 198 192" stroke-width="1.4"/>
+        <path d="M306 236 C282 222 254 210 228 204 C212 200 196 204 186 212" stroke-width="1.4"/>
+
+        <!-- Primary flight feathers (long, individual, at wing tips) -->
+        <path d="M108 64 C92 56 72 48 54 44 C42 42 34 46 32 54" stroke-width="1.6"/>
+        <path d="M120 72 C102 62 80 52 62 48 C48 46 38 50 36 60" stroke-width="1.6"/>
+        <path d="M136 82 C116 72 92 60 72 56 C58 54 46 58 44 68" stroke-width="1.6"/>
+        <path d="M156 94 C134 82 108 70 86 66 C70 64 58 68 56 80" stroke-width="1.6"/>
+        <path d="M178 108 C154 96 126 82 104 78 C86 76 74 82 72 94" stroke-width="1.6"/>
+        <path d="M200 124 C176 112 148 98 124 94 C106 92 92 98 90 112" stroke-width="1.6"/>
+        <path d="M224 142 C198 130 168 118 144 114 C126 112 112 118 110 132" stroke-width="1.5"/>
+        <path d="M248 160 C222 148 192 138 168 136 C150 136 136 142 134 156" stroke-width="1.4"/>
+
+        <!-- Feather midrib lines (left wing) -->
+        <path d="M108 64 C128 80 152 100 174 120" stroke-width="0.7"/>
+        <path d="M120 72 C138 88 160 108 180 128" stroke-width="0.7"/>
+        <path d="M136 82 C152 98 172 118 190 138" stroke-width="0.7"/>
+        <path d="M156 94 C170 108 188 128 204 150" stroke-width="0.7"/>
+        <path d="M178 108 C190 122 206 142 220 162" stroke-width="0.7"/>
+        <path d="M200 124 C212 138 226 158 238 178" stroke-width="0.7"/>
+
+        <!-- ═══ RIGHT WING — Sweeping Upward (Mirror) ═══ -->
+        <!-- Wing outline (upper edge) -->
+        <path d="M418 226 C432 210 460 185 490 160 C520 136 555 112 590 95 C625 78 660 68 692 64 C718 62 740 66 752 76" stroke-width="2.2"/>
+        <!-- Wing outline (lower edge / underwing) -->
+        <path d="M438 290 C452 275 480 255 510 238 C540 222 572 210 602 204 C630 198 652 200 668 208 C682 216 688 228 686 240" stroke-width="2.0"/>
+
+        <!-- Covert feathers (small, near body) -->
+        <path d="M426 248 C438 236 456 222 476 210" stroke-width="1.2"/>
+        <path d="M430 260 C444 248 464 234 486 222" stroke-width="1.2"/>
+        <path d="M434 274 C450 260 472 246 494 236" stroke-width="1.2"/>
+
+        <!-- Secondary feathers (medium, mid-wing) -->
+        <path d="M476 210 C496 196 522 182 548 172 C562 168 576 168 586 174" stroke-width="1.4"/>
+        <path d="M486 222 C508 208 536 194 562 186 C578 182 592 184 602 192" stroke-width="1.4"/>
+        <path d="M494 236 C518 222 546 210 572 204 C588 200 604 204 614 212" stroke-width="1.4"/>
+
+        <!-- Primary flight feathers (long, individual, at wing tips) -->
+        <path d="M692 64 C708 56 728 48 746 44 C758 42 766 46 768 54" stroke-width="1.6"/>
+        <path d="M680 72 C698 62 720 52 738 48 C752 46 762 50 764 60" stroke-width="1.6"/>
+        <path d="M664 82 C684 72 708 60 728 56 C742 54 754 58 756 68" stroke-width="1.6"/>
+        <path d="M644 94 C666 82 692 70 714 66 C730 64 742 68 744 80" stroke-width="1.6"/>
+        <path d="M622 108 C646 96 674 82 696 78 C714 76 726 82 728 94" stroke-width="1.6"/>
+        <path d="M600 124 C624 112 652 98 676 94 C694 92 708 98 710 112" stroke-width="1.6"/>
+        <path d="M576 142 C602 130 632 118 656 114 C674 112 688 118 690 132" stroke-width="1.5"/>
+        <path d="M552 160 C578 148 608 138 632 136 C650 136 664 142 666 156" stroke-width="1.4"/>
+
+        <!-- Feather midrib lines (right wing) -->
+        <path d="M692 64 C672 80 648 100 626 120" stroke-width="0.7"/>
+        <path d="M680 72 C662 88 640 108 620 128" stroke-width="0.7"/>
+        <path d="M664 82 C648 98 628 118 610 138" stroke-width="0.7"/>
+        <path d="M644 94 C630 108 612 128 596 150" stroke-width="0.7"/>
+        <path d="M622 108 C610 122 594 142 580 162" stroke-width="0.7"/>
+        <path d="M600 124 C588 138 574 158 562 178" stroke-width="0.7"/>
+
+        <!-- ═══ LEGS & TALONS ═══ -->
+        <!-- Left leg -->
+        <path d="M388 400 C382 420 378 440 376 460 C374 475 376 488 380 498" stroke-width="1.8"/>
+        <!-- Left foot/talons -->
+        <path d="M380 498 C374 508 366 518 358 526 C352 532 348 536 342 538" stroke-width="1.6"/>
+        <path d="M380 498 C378 510 374 522 370 530 C368 536 364 540 360 542" stroke-width="1.4"/>
+        <path d="M380 498 C382 510 382 522 380 532 C378 538 376 542 374 544" stroke-width="1.4"/>
+        <path d="M380 498 C386 508 390 520 392 528 C392 532 392 536 390 538" stroke-width="1.2"/>
+        <!-- Talon tips (left) -->
+        <path d="M342 538 C338 542 336 548 340 550" stroke-width="1.6"/>
+        <path d="M360 542 C356 546 354 552 358 554" stroke-width="1.4"/>
+        <path d="M374 544 C372 548 370 554 374 556" stroke-width="1.4"/>
+
+        <!-- Right leg -->
+        <path d="M412 400 C418 420 422 440 424 460 C426 475 424 488 420 498" stroke-width="1.8"/>
+        <!-- Right foot/talons -->
+        <path d="M420 498 C426 508 434 518 442 526 C448 532 452 536 458 538" stroke-width="1.6"/>
+        <path d="M420 498 C422 510 426 522 430 530 C432 536 436 540 440 542" stroke-width="1.4"/>
+        <path d="M420 498 C418 510 418 522 420 532 C422 538 424 542 426 544" stroke-width="1.4"/>
+        <path d="M420 498 C414 508 410 520 408 528 C408 532 408 536 410 538" stroke-width="1.2"/>
+        <!-- Talon tips (right) -->
+        <path d="M458 538 C462 542 464 548 460 550" stroke-width="1.6"/>
+        <path d="M440 542 C444 546 446 552 442 554" stroke-width="1.4"/>
+        <path d="M426 544 C428 548 430 554 426 556" stroke-width="1.4"/>
+
+        <!-- Leg scale details -->
+        <path d="M380 430 C386 432 392 432 396 430" stroke-width="0.7"/>
+        <path d="M378 445 C384 448 392 448 396 446" stroke-width="0.7"/>
+        <path d="M376 460 C382 464 390 464 396 462" stroke-width="0.7"/>
+        <path d="M378 475 C384 478 390 478 396 476" stroke-width="0.7"/>
+        <path d="M420 430 C414 432 408 432 404 430" stroke-width="0.7"/>
+        <path d="M422 445 C416 448 408 448 404 446" stroke-width="0.7"/>
+        <path d="M424 460 C418 464 410 464 404 462" stroke-width="0.7"/>
+        <path d="M422 475 C416 478 410 478 404 476" stroke-width="0.7"/>
+
+        <!-- ═══ TAIL — Flowing, ornamental ═══ -->
+        <!-- Central tail feathers -->
+        <path d="M400 410 C398 440 396 480 398 520 C400 560 404 600 410 640 C416 680 424 720 434 760 C440 790 446 820 448 850" stroke-width="1.8"/>
+        <path d="M400 410 C402 440 404 480 402 520 C400 560 396 600 390 640 C384 680 376 720 366 760 C360 790 354 820 352 850" stroke-width="1.8"/>
+
+        <!-- Inner tail feathers -->
+        <path d="M396 412 C390 445 382 490 380 535 C378 580 382 625 392 670 C400 710 412 745 426 780 C436 806 444 830 450 860" stroke-width="1.5"/>
+        <path d="M404 412 C410 445 418 490 420 535 C422 580 418 625 408 670 C400 710 388 745 374 780 C364 806 356 830 350 860" stroke-width="1.5"/>
+
+        <!-- Outer tail feathers (more swept) -->
+        <path d="M392 414 C382 448 370 496 366 545 C362 594 366 642 378 690 C388 732 404 770 422 804 C436 830 448 854 458 878" stroke-width="1.4"/>
+        <path d="M408 414 C418 448 430 496 434 545 C438 594 434 642 422 690 C412 732 396 770 378 804 C364 830 352 854 342 878" stroke-width="1.4"/>
+
+        <!-- Outermost tail feathers (widest sweep) -->
+        <path d="M388 416 C374 450 358 500 352 555 C346 610 352 660 368 712 C382 756 402 796 426 832 C444 858 460 882 472 904" stroke-width="1.3"/>
+        <path d="M412 416 C426 450 442 500 448 555 C454 610 448 660 432 712 C418 756 398 796 374 832 C356 858 340 882 328 904" stroke-width="1.3"/>
+
+        <!-- Tail feather center ribs -->
+        <path d="M400 420 C400 480 402 540 406 600 C410 650 418 700 430 750" stroke-width="0.6"/>
+        <path d="M400 420 C400 480 398 540 394 600 C390 650 382 700 370 750" stroke-width="0.6"/>
+
+        <!-- Tail tip curls -->
+        <path d="M448 850 C452 862 458 872 466 876 C472 878 476 874 474 866" stroke-width="1.4"/>
+        <path d="M352 850 C348 862 342 872 334 876 C328 878 324 874 326 866" stroke-width="1.4"/>
+        <path d="M450 860 C454 872 460 882 468 886 C474 888 478 884 476 876" stroke-width="1.2"/>
+        <path d="M350 860 C346 872 340 882 332 886 C326 888 322 884 324 876" stroke-width="1.2"/>
+        <path d="M458 878 C462 890 468 898 476 900 C482 900 484 896 482 888" stroke-width="1.1"/>
+        <path d="M342 878 C338 890 332 898 324 900 C318 900 316 896 318 888" stroke-width="1.1"/>
+        <path d="M472 904 C476 914 482 920 488 920 C492 918 492 912 488 906" stroke-width="1.0"/>
+        <path d="M328 904 C324 914 318 920 312 920 C308 918 308 912 312 906" stroke-width="1.0"/>
+
+        <!-- Tail feather barb detail lines -->
+        <path d="M396 500 C400 502 404 502 408 500" stroke-width="0.6"/>
+        <path d="M392 540 C396 544 400 544 404 544 C408 544 412 542 416 538" stroke-width="0.6"/>
+        <path d="M386 580 C392 586 398 588 400 588 C402 588 408 586 414 580" stroke-width="0.6"/>
+        <path d="M382 620 C390 628 398 632 400 632 C402 632 410 628 418 620" stroke-width="0.6"/>
+        <path d="M380 660 C390 670 398 674 400 674 C402 674 410 670 420 660" stroke-width="0.6"/>
+        <path d="M378 700 C388 712 398 718 400 718 C402 718 412 712 422 700" stroke-width="0.6"/>
+        <path d="M376 740 C388 754 398 760 400 760 C402 760 412 754 424 740" stroke-width="0.6"/>
+        <path d="M374 780 C388 796 398 802 400 802 C402 802 412 796 426 780" stroke-width="0.6"/>
+
+      </g>
+    </svg>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       FORM CONTENT — Exact PDF layout replication
+       ══════════════════════════════════════════════════════════ -->
+  <div class="content">
+
+    <!-- ── Title ── -->
+    <div class="title-block">
+      <h1>Empyreal Seeker Assessment</h1>
+    </div>
+
+    <!-- ── Introduction ── -->
+    <p class="intro-text">
+      This is a short assessment to gauge your experience, preferences &amp; aptitudes. Please answer all
+      questions to the best of your ability.
+    </p>
+
+    <p class="footnote">
+      *Empyreal is the demonym for a member of the Phoenix Temple.
+    </p>
+
+    <!-- ── Form ── -->
+    <form id="seekerForm" onsubmit="return handleSubmit(event)">
+
+      <!-- ════════════════════════════════════════════════════
+           SECTION: Basic Demographic Questions
+           ════════════════════════════════════════════════════ -->
+      <h2 class="section-heading">Basic Demographic Questions</h2>
+
+      <div class="field-block">
+        <label for="preferredName">What name do you wish to be known by?</label>
+        <input type="text" id="preferredName" name="preferredName" class="line-input" required>
+      </div>
+
+      <div class="field-block">
+        <label for="age">What is your age?</label>
+        <input type="text" id="age" name="age" class="line-input">
+      </div>
+
+      <div class="field-block">
+        <label for="cityState">In which city &amp; state do you reside?</label>
+        <input type="text" id="cityState" name="cityState" class="line-input">
+      </div>
+
+      <!-- ════════════════════════════════════════════════════
+           SECTION: Assessment Questions
+           ════════════════════════════════════════════════════ -->
+      <h2 class="section-heading">Assessment Questions</h2>
+
+      <div class="field-block">
+        <label for="guildInterest">What about the Phoenix Guild interested you?</label>
+        <textarea id="guildInterest" name="guildInterest" class="lined-textarea rows-4"></textarea>
+      </div>
+
+      <div class="field-block">
+        <label for="arcaneExperience">What is your experience with arcane/mystical topics?</label>
+        <span class="field-hint">(Experience is not required. This is simply to gauge where you stand currently.)</span>
+        <textarea id="arcaneExperience" name="arcaneExperience" class="lined-textarea rows-7"></textarea>
+      </div>
+
+      <div class="field-block">
+        <label for="favAnimal">What is your favorite animal and why?</label>
+        <textarea id="favAnimal" name="favAnimal" class="lined-textarea rows-3"></textarea>
+      </div>
+
+      <div class="field-block">
+        <label for="leastFavAnimal">What is your least favorite animal and why?</label>
+        <textarea id="leastFavAnimal" name="leastFavAnimal" class="lined-textarea rows-3"></textarea>
+      </div>
+
+      <!-- ── Submit ── -->
+      <div class="submit-section">
+        <button type="submit" class="submit-btn" id="submitBtn">Submit Assessment</button>
+        <p class="submit-note">Your responses will be reviewed by the Guild.</p>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<!-- ── Success Overlay ── -->
+<div class="success-overlay" id="successOverlay">
+  <h2>Assessment Received</h2>
+  <p>The Phoenix Temple thanks you, Seeker.<br>Your journey begins now.</p>
+</div>
+
+<!-- ── Error Toast ── -->
+<div class="error-toast" id="errorToast">
+  <span id="errorMessage">An error occurred. Please try again.</span>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     JAVASCRIPT — Google Apps Script Compatible
+     Uses google.script.run for HtmlService deployments.
+     Includes local-development fallback for testing.
+     ══════════════════════════════════════════════════════════ -->
+<script>
+  var submitBtn = document.getElementById('submitBtn');
+  var errorToast = document.getElementById('errorToast');
+
+  /**
+   * Show an error toast that auto-dismisses after 5 seconds.
+   * @param {string} msg - Error message to display.
+   */
+  function showError(msg) {
+    document.getElementById('errorMessage').textContent = msg;
+    errorToast.style.display = 'block';
+    errorToast.style.opacity = '1';
+    setTimeout(function() {
+      errorToast.style.opacity = '0';
+      setTimeout(function() { errorToast.style.display = 'none'; }, 300);
+    }, 5000);
+  }
+
+  /**
+   * Reset the submit button to its default state.
+   */
+  function resetButton() {
+    submitBtn.textContent = 'Submit Assessment';
+    submitBtn.disabled = false;
+    submitBtn.style.opacity = '1';
+  }
+
+  /**
+   * Handle form submission.
+   * Builds a payload object and routes it through google.script.run
+   * when running inside Apps Script, or logs to console as a fallback.
+   */
+  function handleSubmit(e) {
+    e.preventDefault();
+
+    // Indicate loading
+    submitBtn.textContent = 'Submitting...';
+    submitBtn.disabled = true;
+    submitBtn.style.opacity = '0.6';
+
+    var formData = {
+      preferredName: document.getElementById('preferredName').value.trim(),
+      age:            document.getElementById('age').value.trim(),
+      cityState:      document.getElementById('cityState').value.trim(),
+      guildInterest:  document.getElementById('guildInterest').value.trim(),
+      arcaneExperience: document.getElementById('arcaneExperience').value.trim(),
+      favAnimal:      document.getElementById('favAnimal').value.trim(),
+      leastFavAnimal: document.getElementById('leastFavAnimal').value.trim()
+    };
+
+    // Client-side validation
+    if (!formData.preferredName) {
+      showError('Please enter your preferred name.');
+      resetButton();
+      return false;
+    }
+
+    // Google Apps Script environment
+    if (typeof google !== 'undefined' && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(function() {
+          document.getElementById('successOverlay').classList.add('visible');
+          document.getElementById('seekerForm').reset();
+          resetButton();
+        })
+        .withFailureHandler(function(err) {
+          showError(err.message || 'Submission failed. Please try again.');
+          resetButton();
+        })
+        .processApplication(formData);
+    } else {
+      // Local development fallback
+      console.log('Assessment submitted (local mode):', formData);
+      setTimeout(function() {
+        document.getElementById('successOverlay').classList.add('visible');
+        resetButton();
+      }, 800);
+    }
+
+    return false;
+  }
+</script>
+</body>
+</html>
