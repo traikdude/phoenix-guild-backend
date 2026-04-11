@@ -190,7 +190,11 @@
     font-family: 'Times New Roman', Times, serif;
     font-size: 12pt;
     color: #1a1a1a;
-    padding: 4px 2px;
+    /* MAGIC CLICK-TARGET EXPANSION: 
+       Pull the box up 16px to swallow the dead zone between the label/hint and the line,
+       then offset the padding and background down by 16px to keep physical visuals perfectly stable! */
+    margin-top: -16px;
+    padding: 20px 2px 4px 2px;
     outline: none;
     resize: none;
     border-radius: 0;
@@ -204,6 +208,7 @@
       #333 27px,
       #333 28px
     );
+    background-position: 0 16px;
     background-attachment: local;
   }
 
@@ -223,10 +228,11 @@
     font-size: 11pt;
   }
 
-  /* Specific row heights matching PDF proportions */
-  .rows-3 { height: 84px; }   /* 3 ruled lines */
-  .rows-4 { height: 112px; }  /* 4 ruled lines */
-  .rows-7 { height: 196px; }  /* 7 ruled lines */
+  /* Specific row heights matching PDF proportions.
+     Compensated +16px to account for the clickable-area padding expansion. */
+  .rows-3 { height: 100px; }  /* 84 + 16 */
+  .rows-4 { height: 128px; }  /* 112 + 16 */
+  .rows-7 { height: 212px; }  /* 196 + 16 */
 
   /* ══════════════════════════════════════════════════════════
      SUBMIT SECTION — Clean, unobtrusive
