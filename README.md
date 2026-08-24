@@ -62,19 +62,19 @@ mindmap
   root((🔥 Phoenix Guild))
     ⚔️ Quest UI
       365KB+ Single-Page Client
-      Cinzel & Fiery Theme
+      Cinzel and Fiery Theme
       Multi-Step Guild Questions
     ☁️ Apps Script Core
       HtmlService WebApp
-      Asynchronous processApplication()
-      Legacy doPost() Webhook
-    🛡️ Concurrency & Safety
+      Asynchronous processApplication Handler
+      Legacy doPost Webhook
+    🛡️ Concurrency and Safety
       LockService Mutex Locking
       Server-Side Timestamps
       Input Sanitization
     📊 Ledger Store
       Google Sheets Submissions Tab
-      Execution Monitoring & Logs
+      Execution Monitoring and Logs
 ```
 
 ### 1. Immersive Guild Onboarding Experience (`Index.html`)
