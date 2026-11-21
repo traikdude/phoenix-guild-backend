@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" role="img" aria-labelledby="title">
+<title id="title">A guild phoenix stamped on the facing page of a ruled ledger</title>
+<defs><pattern id="rows" width="100" height="47" patternUnits="userSpaceOnUse"><path d="M0 0H100M0 0V47" fill="none" stroke="#985e46" stroke-width="2"/></pattern><path id="plume" d="M0 0Q-110 -24 -166 -151Q-63 -116 0 0Z"/></defs>
+<rect width="1280" height="640" fill="#362126"/><rect x="26" y="26" width="1228" height="588" rx="9" fill="none" stroke="#cf965e" stroke-width="3"/>
+<path d="M80 88Q365 43 638 98Q902 43 1200 88V563Q912 523 638 580Q375 524 80 563Z" fill="#d5a568"/>
+<path d="M82 77Q360 33 638 87Q912 33 1198 77V548Q909 508 638 565Q371 508 82 548Z" fill="#ffebbc"/>
+<path d="M638 88V562" stroke="#c39a69" stroke-width="8"/><rect x="684" y="134" width="461" height="355" fill="url(#rows)"/>
+<circle cx="345" cy="263" r="140" fill="none" stroke="#cb9862" stroke-width="2" stroke-dasharray="4 8"/>
+<g fill="#ad3928" transform="translate(342 315)"><use href="#plume"/><use href="#plume" transform="rotate(-17)"/><use href="#plume" transform="rotate(-35)"/><g transform="scale(-1 1)"><use href="#plume"/><use href="#plume" transform="rotate(-17)"/><use href="#plume" transform="rotate(-35)"/></g></g>
+<path d="M255 469Q320 408 309 352Q291 302 333 269Q350 252 344 217Q386 228 393 254L421 270L386 275Q366 285 369 316Q380 366 343 400Q299 431 287 483Q283 443 293 424Z" fill="#843022"/><circle cx="378" cy="253" r="4" fill="#ffebbc"/>
+<path d="M128 505H565M718 108H1110" stroke="#ad7748" stroke-width="3"/></svg>

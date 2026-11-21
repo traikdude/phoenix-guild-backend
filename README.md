@@ -1,205 +1,71 @@
-<!-- 🔥 PHOENIX GUILD BACKEND — REPOSITORY PRESENTATION (L3 SHOWCASE) -->
+![A copper-red phoenix spreads its wings across an open book beside a ruled submissions ledger.](assets/banner/banner.png)
 
-<div align="center">
+# 🔥 Phoenix Guild Backend
 
-<img src="docs/assets/banner.svg" alt="Phoenix Guild Backend banner" width="100%">
+The **Empyreal Seeker Assessment** is a guild application that reads like a paper questionnaire. Seekers answer seven prompts on one page. In Apps Script, the form sends those answers to a handler that appends one row to a Google Sheet.
 
-# **🔥 Phoenix Guild Backend**
+## 📑 Table of contents
 
-**An immersive quest assessment web platform, concurrency-safe application processor, and cloud ledger pipeline built with Google Apps Script HtmlService and V8.**
+[Features](#-core-features) · [Architecture](#-architecture-and-tech-stack) · [Quick start](#-quick-start) · [Deployment](#-deployment-and-status) · [Layout](#-repository-layout) · [Contributing](#-contributing) · [License](#-license)
 
-[![Status](https://img.shields.io/badge/status-active%20%26%20verified-success?style=flat-square)](#-core-features)
-[![Engine](https://img.shields.io/badge/engine-Google%20Apps%20Script%20V8-34A853?style=flat-square&logo=google)](appsscript.json)
-[![Deployment](https://img.shields.io/badge/deployment-Clasp%20%2B%20HtmlService-orange?style=flat-square)](.clasp.json)
-[![Security](https://img.shields.io/badge/concurrency-LockService%20Mutex-E11D48?style=flat-square)](#-concurrency-locking--security)
-[![License: MIT](https://img.shields.io/badge/license-MIT-informational?style=flat-square)](LICENSE)
-[![Last Commit](https://img.shields.io/github/last-commit/traikdude/phoenix-guild-backend?style=flat-square&color=2ea44f)](https://github.com/traikdude/phoenix-guild-backend)
+## 🚀 Core features
 
-<p align="center">
-  <a href="#-overview"><b>Overview</b></a> •
-  <a href="#-core-features"><b>Features</b></a> •
-  <a href="#-concurrency-locking--security"><b>Security</b></a> •
-  <a href="#-architecture"><b>Architecture</b></a> •
-  <a href="#-quick-start--clasp"><b>Quick Start</b></a> •
-  <a href="#-contributing"><b>Contributing</b></a> •
-  <a href="#-license"><b>License</b></a>
-</p>
+| What happens | Where to look |
+|---|---|
+| A seeker fills in three introductory fields and four longer answers on a ruled form. The browser trims each answer, checks the preferred name and shows either confirmation or a submission error. | [Form and submit handler](Index.html) |
+| The hosted form calls `processApplication`. The handler checks for a nonblank preferred name and assigns a UTC timestamp before writing. | [RPC handler](Code.gs) |
+| A legacy JSON POST route uses the same writer. It accepts a supplied timestamp and skips the RPC name check. Its JSON response reports success or error in `result`. | [POST handler](Code.gs) |
+| The writer waits up to ten seconds for a script lock. It creates the `Submissions` tab if needed, adds and freezes the header on an empty tab, then appends eight columns in a fixed order. | [Sheet writer](Code.gs) |
+| A maintainer can run `runHealthCheck` to log and return two results covering script execution and an outbound request to Google. | [Health check](monitoring.gs) |
 
-</div>
+## 🏗️ Architecture and tech stack
 
----
-
-## 📑 Table of Contents
-
-- [✨ Overview](#-overview)
-- [🚀 Core Features](#-core-features)
-  - [1. Immersive Guild Onboarding Experience (`Index.html`)](#1-immersive-guild-onboarding-experience-indexhtml)
-  - [2. Concurrency-Safe Ledger Pipeline (`Code.gs`)](#2-concurrency-safe-ledger-pipeline-codegs)
-  - [3. Dual RPC & REST Ingestion Endpoints](#3-dual-rpc--rest-ingestion-endpoints)
-  - [4. Automated Health Monitoring & Telemetry](#4-automated-health-monitoring--telemetry)
-- [🛡️ Concurrency Locking & Security](#-concurrency-locking--security)
-- [🏗️ Architecture & Component Flow](#-architecture--component-flow)
-- [🛠️ Tech Stack](#-tech-stack)
-- [⚡ Quick Start & Clasp Deployment](#-quick-start--clasp-deployment)
-- [🗂️ Repository Structure](#-repository-structure)
-- [🤝 Contributing](#-contributing)
-- [📄 License](#-license)
-
----
-
-## ✨ Overview
-
-**Phoenix Guild Backend** powers the **Empyreal Seeker Assessment**, a gamified guild onboarding web app and candidate submission engine.
-
-Built with **Google Apps Script V8**, **HtmlService**, and **Google Sheets**, the backend handles client-side form submissions asynchronously (`google.script.run`), verifies input integrity, enforces concurrency mutex locking via `LockService` to eliminate race conditions, and persists applications directly into structured spreadsheet ledgers.
-
----
-
-## 🚀 Core Features
+`doGet` serves the HTML, CSS and browser JavaScript through HtmlService. The server uses the Apps Script V8 runtime, LockService and SpreadsheetApp. [Web app entry points](Code.gs) · [Runtime manifest](appsscript.json)
 
 ```mermaid
-mindmap
-  root((🔥 Phoenix Guild))
-    ⚔️ Quest UI
-      365KB+ Single-Page Client
-      Cinzel and Fiery Theme
-      Multi-Step Guild Questions
-    ☁️ Apps Script Core
-      HtmlService WebApp
-      Asynchronous processApplication Handler
-      Legacy doPost Webhook
-    🛡️ Concurrency and Safety
-      LockService Mutex Locking
-      Server-Side Timestamps
-      Input Sanitization
-    📊 Ledger Store
-      Google Sheets Submissions Tab
-      Execution Monitoring and Logs
+flowchart LR
+    Form[Hosted assessment] --> RPC[processApplication]
+    Client[JSON client] --> POST[doPost]
+    RPC --> Write[_writeToSheet]
+    POST --> Write
+    Write --> Sheet[Submissions tab]
 ```
 
-### 1. Immersive Guild Onboarding Experience (`Index.html`)
-365KB+ self-contained responsive client providing a gamified assessment interface with interactive scoring and animations.
+## ⚡ Quick start
 
-### 2. Concurrency-Safe Ledger Pipeline (`Code.gs`)
-Utilizes Google Apps Script `LockService.getScriptLock()` with a 10-second timeout to prevent data collision during simultaneous submissions.
+From the repository root in PowerShell, open the form locally.
 
-### 3. Dual RPC & REST Ingestion Endpoints
-Supports interactive client-side execution via `google.script.run` as well as headless automated submissions via standard HTTP POST (`doPost`).
-
-### 4. Automated Health Monitoring & Telemetry
-Monitors backend execution times, lock contention, and submission counts via [`monitoring.gs`](monitoring.gs).
-
----
-
-## 🛡️ Concurrency Locking & Security
-
-* 🔒 **Mutex Locking**: `LockService.getScriptLock()` guarantees single-threaded spreadsheet writes under heavy submission bursts.
-* 🛡️ **Anti-Spoofing Timestamps**: Enforces server-side UTC timestamps (`new Date().toISOString()`) rather than trusting client clocks.
-* 🧹 **Input Sanitization**: Rejects empty payloads and trims string inputs before writing to Google Sheets.
-
----
-
-## 🏗️ Architecture & Component Flow
-
-```mermaid
-flowchart TD
-    subgraph CLIENT["🖥️ Empyreal Seeker Web Client (Index.html)"]
-        FORM["Assessment Form & Interactive Questions"]
-        RPC["google.script.run.processApplication()"]
-        FORM --> RPC
-    end
-
-    subgraph BACKEND["☁️ Google Apps Script Core (Code.gs)"]
-        VAL["Input Sanitizer & Server Timestamp"]
-        LOCK["LockService.getScriptLock(10000ms)"]
-        WRITE["_writeToSheet(formData)"]
-        RELEASE["lock.releaseLock()"]
-        VAL --> LOCK --> WRITE --> RELEASE
-    end
-
-    subgraph STORAGE["📊 Google Workspace Ledger"]
-        SHEET["Submissions Google Sheet"]
-        MONITOR["monitoring.gs Execution Telemetry"]
-    end
-
-    RPC <-->|"Async Remote Procedure Call"| VAL
-    WRITE --> SHEET & MONITOR
+```powershell
+Start-Process .\Index.html
 ```
 
----
+Enter sample answers and submit. The local preview prints the payload in the browser console and displays the confirmation after a short delay. It works without an Apps Script login. Spreadsheet persistence requires the hosted path.
 
-## 🛠️ Tech Stack
+## ☁️ Deployment and status
 
-* **Platform**: Google Apps Script JavaScript V8 (`Code.gs`, `appsscript.json`)
-* **Frontend**: Responsive Single-Page Application (`Index.html`, 365KB+)
-* **Database / Store**: Google Sheets (`SpreadsheetApp`)
-* **DevOps**: `@google/clasp` deployment pipeline
+1. For a test deployment, open a disposable Google Sheet and choose **Extensions → Apps Script**. Copy in [Code.gs](Code.gs), [Index.html](Index.html), [monitoring.gs](monitoring.gs) and the [manifest](appsscript.json).
+2. In the Apps Script editor, choose **Deploy → New deployment → Web app**. Review access before deploying. The repository manifest specifies execution as the deployer and anonymous access.
+3. Submit a synthetic application through the web app and inspect the spreadsheet for the corresponding timestamped row. The writer calls `getActiveSpreadsheet()` and throws if the hosted execution has no active spreadsheet. A bound project still needs this end-to-end check.
 
----
+For clasp users, the checkout contains an existing project binding. Target your own test project before syncing. The [deployment workflow](.github/workflows/deploy.yml) shows source upload and deployment as separate commands, `clasp push` and `clasp deploy`.
 
-## ⚡ Quick Start & Clasp Deployment
+**Verification gap.** The included health check does not submit an application, check the spreadsheet, count submissions or measure lock contention. A live deployment and successful hosted write have yet to be verified for this refresh.
 
-### Prerequisites
-* [Node.js](https://nodejs.org/) (v18+)
-* [@google/clasp](https://www.npmjs.com/package/@google/clasp)
+## 🗂️ Repository layout
 
-### Setup Instructions
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/traikdude/phoenix-guild-backend.git
-   cd phoenix-guild-backend
-   ```
-2. Login to Google Apps Script:
-   ```bash
-   clasp login
-   ```
-3. Push changes:
-   ```bash
-   clasp push
-   ```
-4. Open the deployed web app:
-   ```bash
-   clasp open --webapp
-   ```
-
----
-
-## 🗂️ Repository Structure
-
-```text
-phoenix-guild-backend/
-├── docs/                        # Presentation & visual assets
-│   └── assets/
-│       └── banner.svg           # L3 Showcase high-resolution vector hero banner
-├── Index.html                   # 365KB+ Gamified quest assessment web client
-├── Code.gs                      # Core Apps Script backend & LockService handlers
-├── monitoring.gs                # Telemetry logger & submission metrics
-├── appsscript.json              # Apps Script manifest & scopes
-├── .clasp.json                  # Google Apps Script project binding
-├── README.md                    # L3 Showcase presentation documentation
-└── LICENSE                      # MIT Open Source License
-```
-
----
+| Path | Purpose |
+|---|---|
+| [Index.html](Index.html) | Assessment layout, form fields and browser submission logic |
+| [Code.gs](Code.gs) | Web entry points, RPC validation and spreadsheet writes |
+| [monitoring.gs](monitoring.gs) | Manually callable execution and connectivity checks |
+| [appsscript.json](appsscript.json) | Runtime and web app settings |
+| [releases/](releases/) | Packaged project archive |
+| [assets/banner/](assets/banner/) | README artwork, [editable vector](assets/banner/banner.svg) and [art direction](assets/banner/BANNER_BRIEF.md) |
 
 ## 🤝 Contributing
 
-1. Fork the repository and create your feature branch (`git checkout -b feature/new-assessment-question`).
-2. Update questions in `Index.html` or ledger schemas in `Code.gs`.
-3. Test locally and deploy with `clasp push`.
-4. Submit a Pull Request.
-
----
+When changing a question, follow its field ID from the HTML through the submit handler to the header and row mapping in the writer. Preview the form locally, then check a synthetic row in a test sheet before opening a pull request.
 
 ## 📄 License
 
-Distributed under the **MIT License**. See [LICENSE](LICENSE) for details.
-
----
-
-<div align="center">
-
-*Forged for Guild Members, Gamified Onboarding & Sovereign AI Agents.*  
-**Phoenix Guild Backend · Google Apps Script · HtmlService · LockService**
-
-</div>
+Distributed under the [MIT License](LICENSE).
